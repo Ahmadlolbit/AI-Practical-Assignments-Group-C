@@ -23,21 +23,28 @@ export const NumberButtons: React.FC<NumberButtonsProps> = ({
                 </button>))}
             </div>
 
-            <div className = "flex gap-3 justify-between mt-2 w-full">
+            <div className="flex gap-3 justify-between mt-2 w-full">
                 <button
-                    key = {'0'}
-                    onClick = {() => onNumberSelect(0)}
-                    className = {clsx('w-full h-10 rounded-md font-semibold transition-colors', selectedNumber === 0 ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600')}
+                    key={'0'}
+                    onClick={() => onNumberSelect(0)}
+                    className={clsx('w-full h-10 rounded-md font-semibold transition-colors', selectedNumber === 0 ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600')}
                 >
                     {'Delete'}
                 </button>
 
                 <button
-                    key = {'clear'}
-                    onClick = {() => onNumberSelect(-1)}
-                    className = {clsx('w-full h-10 rounded-md font-semibold transition-colors', selectedNumber === -1 ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600')}
+                    key={'clear'}
+                    onClick={() => onNumberSelect(-1)}
+                    className={clsx('w-full h-10 rounded-md font-semibold transition-colors', selectedNumber === -1 ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600')}
                 >
                     {'Clear'}
+                </button>
+                <button
+                    key={'solve'}
+                    onClick={() => onNumberSelect(-2)}
+                    className={clsx('w-full h-10 rounded-md font-semibold transition-colors', selectedNumber === -1 ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600')}
+                >
+                    {'Solve'}
                 </button>
             </div>
         </div>);

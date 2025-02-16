@@ -4,17 +4,19 @@ from pydantic import BaseModel
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
 
-M = 9
+
 
 app = FastAPI(title="Sudoku Solver (backtracking)")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+M = 9
 
 class StartGARequest(BaseModel):
     board: List[List[int]]
@@ -50,17 +52,6 @@ def sudoko(grid, row, col):
         grid[row][col] = 0
     return False
 
-@app.post("/start_ga")
-def start_ga(request: StartGARequest):
-    board = request.board
-    if not validate_board(np.array(board)):
-        raise HTTPException(status_code=400, detail="Invalid Sudoku board: contains duplicates in fixed cells")
-
-    if sudoko(board, 0, 0):
-        return {"solved": True, "grid": board}
-    else:
-        return {"solved": False, "message": "The Sudoku puzzle is not solvable."}
-
 def validate_board(board: np.ndarray) -> bool:
     for i in range(9):
         row = board[i, :]
@@ -78,3 +69,13 @@ def validate_board(board: np.ndarray) -> bool:
 
 def is_unique(arr):
     return len(arr) == len(set(arr))
+
+@app.post("/start_ga")
+def start_ga(request: StartGARequest):
+    board = request.board
+    if not validate_board(np.array(board)):
+        raise HTTPException(status_code=400, detail="Invalid Sudoku board: contains duplicates in fixed cells")
+    if sudoko(board, 0, 0):
+        return {"solved": True, "grid": board}
+    else:
+        return {"solved": False, "message": "The Sudoku puzzle is not solvable."}
