@@ -1,4 +1,20 @@
-import heapq
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import List, Union
+
+app = FastAPI()
+
+# CORS configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class IslandRequest(BaseModel):
+    island: List[List[Union[str, int]]]
 
 def find_start_end(island):
     rows = len(island)
@@ -55,13 +71,14 @@ def treasure_island_greedy_bfs(island):
 
     return []
 
-# Example usage:
-island = [
-    ['S', 1, 0, 1, 'X'],
-    [1, 1, 0, 1, 1],
-    [0, 1, 1, 1, 0],
-    [1, 0, 1, 1, 1],
-    [0, 0, 0, 1, 'X']
-]
-path = treasure_island_greedy_bfs(island)
-print("Path coordinates:", path)
+@app.post("/find-path")
+async def find_path(request: IslandRequest):
+    try:
+        path = treasure_island_greedy_bfs(request.island)
+        return {"path": path}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
