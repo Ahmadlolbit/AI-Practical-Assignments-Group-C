@@ -1,7 +1,9 @@
+import PathFinder from './components/PathFinder';
+
 function App() {
     return (
-        <div>
-            Hey!
+        <div className="App">
+            <PathFinder />
         </div>
     );
 }
