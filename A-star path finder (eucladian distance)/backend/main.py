@@ -88,8 +88,6 @@ def a_star(start_id, goal_id):
 
 
 @app.post("/nodes/")
-
-
 def add_node(node_id: str, node: Node):
     nodes_db[node_id] = node
     return {"status": f"Node {node_id} added"}
