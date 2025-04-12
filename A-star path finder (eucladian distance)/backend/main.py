@@ -1,119 +1,80 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-import math
-import heapq
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
+import os
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 class Node(BaseModel):
-    x: int
-    y: int
+    id: int
+    x: float
+    y: float
+    letter: str
+    cost: int
 
+class Connection(BaseModel):
+    fromNode: int
+    to: int
 
-class Edge(BaseModel):
-    node1: str
-    node2: str
+class GraphPayload(BaseModel):
+    nodes: list[Node]
+    connections: list[Connection]
 
+def save_to_history(data: GraphPayload):
+    history_file = "History.txt"
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-nodes_db = {}
-edges_db = set()  # Changed to a set
+    with open(history_file, "a") as f:
+        f.write(f"\n\n=== Entry at {timestamp} ===\n")
 
+        # Write nodes
+        f.write("Nodes:\n")
+        for node in data.nodes:
+            f.write(f"  Node {node.id}:\n")
+            f.write(f"    Position: ({node.x}, {node.y})\n")
+            f.write(f"    Letter: {node.letter}\n")
+            f.write(f"    Cost: {node.cost}\n")
 
-class AStarNode:
-    def __init__(self, node_id, parent=None):
-        self.node_id = node_id
-        self.parent = parent
-        self.g = 0  # Actual cost
-        self.h = 0  # Heuristic cost
-        self.f = 0  # Total cost
+        # Write connections
+        f.write("\nConnections:\n")
+        for conn in data.connections:
+            f.write(f"  From node {conn.fromNode} to node {conn.to}\n")
 
-    def __lt__(self, other):
-        return self.f < other.f
+        f.write("="*40)
 
+@app.post("/save-graph")
+async def save_graph(data: GraphPayload):
+    try:
+        # Print to console
+        print("\n=== Nodes ===")
+        for node in data.nodes:
+            print(f"Node {node.id}:")
+            print(f"  Position: ({node.x}, {node.y})")
+            print(f"  Letter: {node.letter}")
+            print(f"  Cost: {node.cost}\n")
 
-def euclidean_distance(node1, node2):
-    return math.sqrt((node1.x - node2.x) ** 2 + (node1.y - node2.y) ** 2)
+        print("\n=== Connections ===")
+        for conn in data.connections:
+            print(f"From node {conn.fromNode} to node {conn.to}")
 
+        # Save to history file
+        save_to_history(data)
 
-def a_star(start_id, goal_id):
-    open_list = []
-    closed_set = set()
+        return {"message": "Graph data processed and saved successfully"}
 
-    start_node = AStarNode(start_id)
-    goal_node = nodes_db[goal_id]
-    start_node.h = euclidean_distance(nodes_db[start_id], goal_node)
-    start_node.f = start_node.g + start_node.h
-    heapq.heappush(open_list, start_node)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-    while open_list:
-        current = heapq.heappop(open_list)
-
-        if current.node_id == goal_id:
-            path = []
-            while current:
-                path.insert(0, {
-                    'node_id': current.node_id,
-                    'g': current.g,
-                    'h': current.h
-                })
-                current = current.parent
-            return path
-
-        closed_set.add(current.node_id)
-
-        for edge in [e for e in edges_db if e[0] == current.node_id]:
-            neighbor_id = edge[1]
-            if neighbor_id in closed_set:
-                continue
-
-            neighbor_node = AStarNode(neighbor_id, current)
-            neighbor_node.g = current.g + euclidean_distance(
-                nodes_db[current.node_id], nodes_db[neighbor_id]
-            )
-            neighbor_node.h = euclidean_distance(
-                nodes_db[neighbor_id], goal_node
-            )
-            neighbor_node.f = neighbor_node.g + neighbor_node.h
-
-            in_open = False
-            for n in open_list:
-                if n.node_id == neighbor_id and n.f <= neighbor_node.f:
-                    in_open = True
-                    break
-            if not in_open:
-                heapq.heappush(open_list, neighbor_node)
-
-    return []
-
-
-@app.post("/nodes/")
-def add_node(node_id: str, node: Node):
-    nodes_db[node_id] = node
-    return {"status": f"Node {node_id} added"}
-
-
-@app.post("/edges/")
-def add_edge(edge: Edge):
-    edges_db.add((edge.node1, edge.node2))
-    return {"status": "Edge added"}
-
-
-@app.get("/path/{start_id}/{goal_id}")
-def calculate_path(start_id: str, goal_id: str):
-    if start_id not in nodes_db or goal_id not in nodes_db:
-        return {"error": "Invalid nodes"}
-
-    path = a_star(start_id, goal_id)
-    if not path:
-        return {"error": "No path found"}
-
-    return {
-        "path": [step['node_id'] for step in path],
-        "costs": [{
-            "node": step['node_id'],
-            "coordinates": (nodes_db[step['node_id']].x, nodes_db[step['node_id']].y),
-            "g_cost": step['g'],
-            "h_cost": step['h']
-        } for step in path]
-    }
+if __name__ == "__main__":
+    # Create empty history file if it doesn't exist
+    if not os.path.exists("History.txt"):
+        open("History.txt", "w").close()
