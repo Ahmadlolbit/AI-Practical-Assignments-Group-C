@@ -1,10 +1,10 @@
 import {useState} from 'react';
-import {SudokuContainer} from './components/SudokuContainer';
-import {ThemeProvider} from './contexts/ThemeContext';
-import { startGASolver } from "./services/api.ts";
-import type {SudokuBoard as BoardType} from './types/sudoku';
+import {SudokuContainer} from './SudokuContainer';
+import {ThemeProvider} from '../contexts/ThemeContext';
+import { startGASolver } from "../services/api.ts";
+import type {SudokuBoard as BoardType} from '../types/sudoku';
 
-function App() {
+function Sudoku() {
     const [board, setBoard] = useState<BoardType>([[0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0],]);
 
     const [originalBoard] = useState<BoardType>(board);
@@ -67,30 +67,30 @@ function App() {
 
     return (<>
 
-            <ThemeProvider>
-                <div className = "flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 py-8 transition-colors">
+        <ThemeProvider>
+            <div className = "flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 py-8 transition-colors">
 
-                    <div className = "text-center">
-                        <h1 className = "text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white">
-                            Sudoku Solver
-                        </h1>
+                <div className = "text-center">
+                    <h1 className = "text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white">
+                        Sudoku Solver
+                    </h1>
 
-                        <div className = "flex grid-cols-12 gap-4">
-                            <div className = "col-span-6">
-                                <SudokuContainer
-                                    board = {board}
-                                    originalBoard = {originalBoard}
-                                    selectedCell = {selectedCell}
-                                    selectedNumber = {selectedNumber}
-                                    onCellClick = {handleCellClick}
-                                    onNumberSelect = {handleNumberSelect}
-                                />
-                            </div>
+                    <div className = "flex grid-cols-12 gap-4">
+                        <div className = "col-span-6">
+                            <SudokuContainer
+                                board = {board}
+                                originalBoard = {originalBoard}
+                                selectedCell = {selectedCell}
+                                selectedNumber = {selectedNumber}
+                                onCellClick = {handleCellClick}
+                                onNumberSelect = {handleNumberSelect}
+                            />
                         </div>
                     </div>
                 </div>
-            </ThemeProvider>
-        </>);
+            </div>
+        </ThemeProvider>
+    </>);
 }
 
-export default App;
+export default Sudoku;
